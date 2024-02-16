@@ -8,19 +8,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController()
 public class TestController {
     private final JwtTokenService service;
 
     @Autowired
-    public TestController(JwtTokenService service){
+    public TestController(JwtTokenService service) {
         this.service = service;
-
     }
 
     @GetMapping("/hello")
-    public ResponseEntity<String > testEndPoint(HttpServletRequest httpServletRequest){
+    public ResponseEntity<String> testEndpoint(HttpServletRequest httpServletRequest) {
+
         int userId = service.getUserIdFromToken(httpServletRequest);
-        return  new ResponseEntity<>("Hello world" + userId, HttpStatus.OK);
+
+        return new ResponseEntity<>( "Hello World!" +  userId, HttpStatus.OK);
     }
 }

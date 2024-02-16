@@ -1,6 +1,5 @@
 package Spring.Home7.Spring.webSecurity.service;
 
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,35 +20,46 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-    private final JwtTokenService service;
+
+    private final JwtTokenService jwtTokenService;
+
     @Autowired
-    public JwtRequestFilter(JwtTokenService service){
-        this.service = service;
+    public JwtRequestFilter(JwtTokenService jwtTokenService) {
+        this.jwtTokenService = jwtTokenService;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            final String token = httpServletRequest.getHeader("Authorization");
-            if(token != null &&  token.startsWith("Bearer ")){
-                String tokenWith = token.substring(7);
-                Authentication authentication = service.getAuth(tokenWith);
+            final String token = request.getHeader("Authorization");
+
+            if (token != null && token.startsWith("Bearer ") ) {
+                // Validate the JWT token
+                //Декодирование токена
+                String tokenWithoutBearer = token.substring(7);
+                Authentication authentication = jwtTokenService.getAuthentication(tokenWithoutBearer);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        }catch (Exception e){
+        } catch (Exception e){
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return;
         }
-        filterChain.doFilter(httpServletRequest,response);
+        filterChain.doFilter(request, response);
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http )throws Exception{
-        http.addFilterBefore(this, UsernamePasswordAuthenticationFilter.class);
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.addFilterBefore(
+                this,
+                UsernamePasswordAuthenticationFilter.class
+        );
 
-        http.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login").permitAll()
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/auth/login").permitAll()
                 .anyRequest().authenticated());
+
         http.csrf(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
 }
