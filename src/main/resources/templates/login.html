@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Авторизация пользователя</title>
+</head>
+<body>
+<h1>Авторизация</h1>
+<form th:action="@{/login}" method="post">
+    <input type="text" th:name="username" />
+    <input type="password" th:name="password" />
+    <input type="submit" value="Login" />
+</form>
+
+</body>
